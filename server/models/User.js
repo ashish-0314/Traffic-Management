@@ -23,24 +23,34 @@ const userSchema = new mongoose.Schema({
     licenseNumber: {
         type: String,
     },
-    savedLocations: [{
-        name: String,
-        coordinates: {
-            lat: Number,
-            lng: Number,
-        }
-    }],
-    frequentRoutes: [{
-        from: String,
-        to: String,
-    }]
+    vehicleNumber: {
+        type: String,
+        unique: true,
+        sparse: true,
+    },
+
+    gender: {
+        type: String,
+        enum: ['Male', 'Female', 'Other', 'Prefer not to say', ''],
+        default: ''
+    },
+    age: {
+        type: Number,
+    },
+    address: {
+        type: String,
+    },
+    profilePicture: {
+        type: String, // URL
+        default: ''
+    }
 }, {
     timestamps: true,
 });
 
-userSchema.pre('save', async function (next) {
+userSchema.pre('save', async function () {
     if (!this.isModified('password')) {
-        next();
+        return;
     }
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);

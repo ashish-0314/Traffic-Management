@@ -15,6 +15,9 @@ const incidentSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    vehiclePlate: {
+        type: String,
+    },
     mediaUrl: {
         type: String, // URL to image/video
     },

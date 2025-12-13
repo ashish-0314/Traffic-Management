@@ -4,8 +4,10 @@ const { protect, adminOrPolice } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
+const upload = require('../middleware/uploadMiddleware');
+
 router.route('/')
-  .post(protect, createIncident)
+  .post(protect, upload.single('media'), createIncident)
   .get(getIncidents);
 
 router.route('/stats')
