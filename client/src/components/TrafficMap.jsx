@@ -234,7 +234,11 @@ const TrafficMap = () => {
     // Debounced search effect
     useEffect(() => {
         const timeoutId = setTimeout(() => {
-            if (searchQuery) performSearch(searchQuery);
+            if (searchQuery) {
+                performSearch(searchQuery);
+            } else {
+                setSearchResults([]);
+            }
         }, 500);
         return () => clearTimeout(timeoutId);
     }, [searchQuery]);
