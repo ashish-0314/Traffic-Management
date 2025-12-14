@@ -17,7 +17,8 @@ const useNotifications = () => {
                     Authorization: `Bearer ${token}`
                 }
             };
-            const res = await axios.get('http://localhost:5000/api/notifications', config);
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            const res = await axios.get(`${API_URL}/api/notifications`, config);
             setNotifications(res.data);
             setUnreadCount(res.data.filter(n => !n.isRead).length);
         } catch (err) {
@@ -39,7 +40,8 @@ const useNotifications = () => {
                     Authorization: `Bearer ${token}`
                 }
             };
-            await axios.patch(`http://localhost:5000/api/notifications/${id}/read`, {}, config);
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            await axios.patch(`${API_URL}/api/notifications/${id}/read`, {}, config);
             // Update local state optimistically
             setNotifications(prev => prev.map(n => n._id === id ? { ...n, isRead: true } : n));
             setUnreadCount(prev => Math.max(0, prev - 1));
@@ -55,7 +57,8 @@ const useNotifications = () => {
                     Authorization: `Bearer ${token}`
                 }
             };
-            await axios.patch('http://localhost:5000/api/notifications/read-all', {}, config);
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            await axios.patch(`${API_URL}/api/notifications/read-all`, {}, config);
             setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
             setUnreadCount(0);
         } catch (err) {

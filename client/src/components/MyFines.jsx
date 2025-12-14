@@ -15,7 +15,8 @@ const MyFines = () => {
                     Authorization: `Bearer ${token}`
                 }
             };
-            const res = await axios.get('http://localhost:5000/api/fines/myfines', config);
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            const res = await axios.get(`${API_URL}/api/fines/myfines`, config);
             setFines(res.data);
         } catch (err) {
             console.error(err);
@@ -35,7 +36,8 @@ const MyFines = () => {
                     Authorization: `Bearer ${token}`
                 }
             };
-            await axios.patch(`http://localhost:5000/api/fines/${id}/pay`, {}, config);
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            await axios.patch(`${API_URL}/api/fines/${id}/pay`, {}, config);
             // Refresh list
             fetchFines();
             alert('Fine Paid Successfully!');

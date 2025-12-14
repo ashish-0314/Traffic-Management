@@ -31,10 +31,11 @@ const Dashboard = () => {
     useEffect(() => {
         const fetchStats = async () => {
             try {
+                const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
                 const config = { headers: { Authorization: `Bearer ${token}` } };
-                const res = await axios.get('http://localhost:5000/api/incidents/stats', config);
+                const res = await axios.get(`${API_URL}/api/incidents/stats`, config);
                 setStats(res.data);
-                const fineRes = await axios.get('http://localhost:5000/api/fines/stats', config);
+                const fineRes = await axios.get(`${API_URL}/api/fines/stats`, config);
                 setFineStats(fineRes.data);
             } catch (err) {
                 console.error(err);

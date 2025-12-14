@@ -17,7 +17,8 @@ const AdminIncidents = () => {
                     Authorization: `Bearer ${token}`
                 }
             };
-            const res = await axios.get('http://localhost:5000/api/incidents', config);
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            const res = await axios.get(`${API_URL}/api/incidents`, config);
             setIncidents(res.data);
         } catch (err) {
             console.error(err);
@@ -37,7 +38,8 @@ const AdminIncidents = () => {
                     Authorization: `Bearer ${token}`
                 }
             };
-            await axios.patch(`http://localhost:5000/api/incidents/${id}/status`, { status }, config);
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            await axios.patch(`${API_URL}/api/incidents/${id}/status`, { status }, config);
             fetchIncidents(); // Refresh
         } catch (err) {
             alert('Failed to update status');

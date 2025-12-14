@@ -122,7 +122,8 @@ const ReportIncident = () => {
                 data.append('media', file);
             }
 
-            await axios.post('http://localhost:5000/api/incidents', data, config);
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            await axios.post(`${API_URL}/api/incidents`, data, config);
             navigate('/');
         } catch (err) {
             console.error(err);

@@ -47,7 +47,8 @@ const Profile = () => {
     const fetchProfile = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get('http://localhost:5000/api/users/profile', {
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            const res = await axios.get(`${API_URL}/api/users/profile`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             const data = res.data;
@@ -96,7 +97,8 @@ const Profile = () => {
                 data.append('profilePicture', selectedFile);
             }
 
-            const res = await axios.put('http://localhost:5000/api/users/profile', data, {
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            const res = await axios.put(`${API_URL}/api/users/profile`, data, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'multipart/form-data'
@@ -133,7 +135,8 @@ const Profile = () => {
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            await axios.put('http://localhost:5000/api/users/profile/password', {
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            await axios.put(`${API_URL}/api/users/profile/password`, {
                 currentPassword: passwordData.currentPassword,
                 newPassword: passwordData.newPassword
             }, {

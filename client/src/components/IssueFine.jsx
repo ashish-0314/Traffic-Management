@@ -40,7 +40,8 @@ const IssueFine = () => {
                     Authorization: `Bearer ${token}`
                 }
             };
-            await axios.post('http://localhost:5000/api/fines', formData, config);
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            await axios.post(`${API_URL}/api/fines`, formData, config);
             setMessage('Fine issued successfully!');
             setTimeout(() => setMessage(''), 3000);
             setFormData({ email: '', vehicleNumber: '', amount: '', reason: '' });

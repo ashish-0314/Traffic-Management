@@ -35,7 +35,8 @@ const TrafficMap = () => {
     useEffect(() => {
         const fetchIncidents = async () => {
             try {
-                const res = await axios.get('http://localhost:5000/api/incidents?status=Verified');
+                const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+                const res = await axios.get(`${API_URL}/api/incidents?status=Verified`);
                 setIncidents(res.data);
             } catch (error) {
                 console.error('Failed to fetch incidents', error);
