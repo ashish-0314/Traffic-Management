@@ -52,6 +52,33 @@ const AdminUsers = () => {
         });
     };
 
+    const handleApprove = async (id) => {
+        try {
+            await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/users/${id}/approve`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            alert('User Approved');
+            fetchUsers();
+        } catch (error) {
+            console.error(error);
+            alert('Failed to approve');
+        }
+    };
+
+    const handleReject = async (id) => {
+        if (!window.confirm('Are you sure you want to reject and delete this user?')) return;
+        try {
+            await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/users/${id}/reject`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            alert('User Rejected');
+            fetchUsers();
+        } catch (error) {
+            console.error(error);
+            alert('Failed to reject');
+        }
+    };
+
     if (loading) return (
         <div className="min-h-screen flex items-center justify-center bg-black">
             <div className="text-white text-xl">Loading Users...</div>
@@ -78,7 +105,7 @@ const AdminUsers = () => {
                             <Search className="absolute left-3 top-3 text-white/50 w-5 h-5" />
                             <input
                                 type="text"
-                                placecholder="Search by name, email, or vehicle number..."
+                                placeholder="Search by name, email, or vehicle number..."
                                 className="glass-input pl-10"
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
@@ -112,6 +139,7 @@ const AdminUsers = () => {
                                 <th className="px-6 py-4 text-left text-xs font-semibold text-blue-300 uppercase tracking-wider">User</th>
                                 <th className="px-6 py-4 text-left text-xs font-semibold text-blue-300 uppercase tracking-wider">Role</th>
                                 <th className="px-6 py-4 text-left text-xs font-semibold text-blue-300 uppercase tracking-wider">Info</th>
+                                <th className="px-6 py-4 text-left text-xs font-semibold text-blue-300 uppercase tracking-wider">Status</th>
                                 <th className="px-6 py-4 text-right text-xs font-semibold text-blue-300 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
@@ -151,16 +179,35 @@ const AdminUsers = () => {
                                             <span className="text-white/30 italic">No Vehicle</span>
                                         )}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        {user.role === 'user' && (
-                                            <button
-                                                onClick={() => handleIssueFine(user)}
-                                                className="text-red-400 hover:text-red-300 hover:bg-red-500/20 px-3 py-1.5 rounded-lg transition-all border border-transparent hover:border-red-500/30 flex items-center ml-auto gap-2"
-                                                title="Issue Fine"
-                                            >
-                                                <AlertCircle className="w-4 h-4" /> Issue Fine
-                                            </button>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        {user.isApproved ? (
+                                            <span className="text-green-400 text-xs bg-green-500/10 px-2 py-1 rounded border border-green-500/20">Active</span>
+                                        ) : (
+                                            <span className="text-yellow-400 text-xs bg-yellow-500/10 px-2 py-1 rounded border border-yellow-500/20">Pending</span>
                                         )}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <div className="flex justify-end gap-2">
+                                            {!user.isApproved && (
+                                                <>
+                                                    <button onClick={() => handleApprove(user._id)} className="text-green-400 hover:bg-green-500/20 p-1.5 rounded transition">
+                                                        <i className="fas fa-check"></i> Approve
+                                                    </button>
+                                                    <button onClick={() => handleReject(user._id)} className="text-red-400 hover:bg-red-500/20 p-1.5 rounded transition">
+                                                        <i className="fas fa-times"></i> Reject
+                                                    </button>
+                                                </>
+                                            )}
+                                            {user.role === 'user' && user.isApproved && (
+                                                <button
+                                                    onClick={() => handleIssueFine(user)}
+                                                    className="text-red-400 hover:text-red-300 hover:bg-red-500/20 px-3 py-1.5 rounded-lg transition-all border border-transparent hover:border-red-500/30 flex items-center gap-2"
+                                                    title="Issue Fine"
+                                                >
+                                                    <AlertCircle className="w-4 h-4" /> Issue Fine
+                                                </button>
+                                            )}
+                                        </div>
                                     </td>
                                 </tr>
                             ))}

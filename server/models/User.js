@@ -43,6 +43,10 @@ const userSchema = new mongoose.Schema({
     profilePicture: {
         type: String, // URL
         default: ''
+    },
+    isApproved: {
+        type: Boolean,
+        default: true
     }
 }, {
     timestamps: true,

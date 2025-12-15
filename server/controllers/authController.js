@@ -34,17 +34,28 @@ const registerUser = async (req, res) => {
             vehicleNumber,
             gender,
             age,
-            address
+            address,
+            isApproved: role === 'traffic_police' ? false : true
         });
 
         if (user) {
-            res.status(201).json({
-                _id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                token: generateToken(user._id, user.role),
-            });
+            if (user.role === 'traffic_police') {
+                res.status(201).json({
+                    _id: user._id,
+                    name: user.name,
+                    email: user.email,
+                    role: user.role,
+                    message: 'Registration successful. Account pending admin approval.'
+                });
+            } else {
+                res.status(201).json({
+                    _id: user._id,
+                    name: user.name,
+                    email: user.email,
+                    role: user.role,
+                    token: generateToken(user._id, user.role),
+                });
+            }
         } else {
             res.status(400).json({ message: 'Invalid user data' });
         }
@@ -61,6 +72,10 @@ const loginUser = async (req, res) => {
 
         if (!user) {
             return res.status(401).json({ message: 'Invalid email or password' });
+        }
+
+        if (!user.isApproved) {
+            return res.status(403).json({ message: 'Account pending admin approval' });
         }
 
         const isMatch = await user.matchPassword(password);

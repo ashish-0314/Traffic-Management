@@ -20,6 +20,11 @@ const issueFine = async (req, res) => {
             return res.status(404).json({ message: 'User not found (check email or vehicle number)' });
         }
 
+        // Prevent fining Admin or Traffic Police
+        if (user.role === 'admin' || user.role === 'traffic_police') {
+            return res.status(400).json({ message: 'Cannot issue fine to Admin or Traffic Police' });
+        }
+
         const fine = await Fine.create({
             user: user._id,
             amount,

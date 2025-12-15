@@ -34,18 +34,24 @@ const Register = () => {
         }
 
         try {
-            await register({
+            const data = await register({
                 name: formData.name,
                 email: formData.email,
                 password: formData.password,
                 licenseNumber: formData.licenseNumber,
-                vehicleNumber: formData.vehicleNumber,
+                vehicleNumber: formData.role === 'traffic_police' ? '' : formData.vehicleNumber,
                 role: formData.role,
                 gender: formData.gender,
                 age: formData.age,
                 address: formData.address
             });
-            navigate('/');
+
+            if (data.token) {
+                navigate('/');
+            } else if (data.message) {
+                alert(data.message);
+                navigate('/login');
+            }
         } catch (err) {
             setError(err.response?.data?.message || 'Registration failed');
         }
@@ -140,10 +146,12 @@ const Register = () => {
                                 <input name="licenseNumber" type="text" className="glass-input" placeholder="License (Opt)" value={formData.licenseNumber} onChange={handleChange} />
                             </div>
                             {/* Vehicle */}
-                            <div className="relative">
-                                <i className="fas fa-car absolute left-3 top-3 text-blue-400 text-xs"></i>
-                                <input name="vehicleNumber" type="text" className="glass-input" placeholder="Vehicle No." value={formData.vehicleNumber} onChange={handleChange} />
-                            </div>
+                            {formData.role !== 'traffic_police' && (
+                                <div className="relative">
+                                    <i className="fas fa-car absolute left-3 top-3 text-blue-400 text-xs"></i>
+                                    <input name="vehicleNumber" type="text" className="glass-input" placeholder="Vehicle No." value={formData.vehicleNumber} onChange={handleChange} />
+                                </div>
+                            )}
                         </div>
 
                         <div className="grid grid-cols-3 gap-3">

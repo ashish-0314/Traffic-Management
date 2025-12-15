@@ -131,4 +131,39 @@ const getAllUsers = async (req, res) => {
     }
 };
 
-module.exports = { getUserProfile, updateUserProfile, updateUserPassword, getAllUsers };
+// @desc    Approve user (Admin only)
+// @route   PUT /api/users/:id/approve
+// @access  Private/Admin
+const approveUser = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (user) {
+            user.isApproved = true;
+            await user.save();
+            res.json({ message: 'User approved' });
+        } else {
+            res.status(404).json({ message: 'User not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to approve user' });
+    }
+};
+
+// @desc    Reject user (Admin only)
+// @route   PUT /api/users/:id/reject
+// @access  Private/Admin
+const rejectUser = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (user) {
+            await user.deleteOne();
+            res.json({ message: 'User rejected and removed' });
+        } else {
+            res.status(404).json({ message: 'User not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to reject user' });
+    }
+};
+
+module.exports = { getUserProfile, updateUserProfile, updateUserPassword, getAllUsers, approveUser, rejectUser };
