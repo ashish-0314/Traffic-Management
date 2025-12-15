@@ -31,7 +31,7 @@ const registerUser = async (req, res) => {
             password,
             role: role || 'user',
             licenseNumber,
-            vehicleNumber,
+            vehicleNumber: vehicleNumber || undefined,
             gender,
             age,
             address,
