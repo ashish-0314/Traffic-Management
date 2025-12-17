@@ -1,5 +1,5 @@
 const express = require('express');
-const { issueFine, getMyFines, payFine, getAllFines, getFineStats } = require('../controllers/fineController');
+const { issueFine, getMyFines, getAllFines, getFineStats, createPaymentOrder, verifyPayment } = require('../controllers/fineController');
 const { protect, adminOrPolice } = require('../middleware/authMiddleware');
 
 const router = express.Router();
@@ -15,7 +15,13 @@ router.route('/myfines')
 router.route('/stats')
     .get(protect, adminOrPolice, getFineStats); // Using adminOrPolice as logic similar to issuing
 
-router.route('/:id/pay')
-    .patch(protect, payFine);
+
+
+// Payment Routes
+router.route('/payment/order')
+    .post(protect, createPaymentOrder);
+
+router.route('/payment/verify')
+    .post(protect, verifyPayment);
 
 module.exports = router;

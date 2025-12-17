@@ -29,7 +29,23 @@ const MyFines = () => {
         fetchFines();
     }, [token]);
 
-    const handlePay = async (id) => {
+    const loadRazorpay = () => {
+        return new Promise((resolve) => {
+            const script = document.createElement('script');
+            script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+            script.onload = () => resolve(true);
+            script.onerror = () => resolve(false);
+            document.body.appendChild(script);
+        });
+    };
+
+    const handlePay = async (fine) => {
+        const res = await loadRazorpay();
+        if (!res) {
+            alert('Razorpay SDK failed to load. Are you online?');
+            return;
+        }
+
         try {
             const config = {
                 headers: {
@@ -37,12 +53,51 @@ const MyFines = () => {
                 }
             };
             const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-            await axios.patch(`${API_URL}/api/fines/${id}/pay`, {}, config);
-            // Refresh list
-            fetchFines();
-            alert('Fine Paid Successfully!');
+
+            // 1. Create Order
+            const orderRes = await axios.post(`${API_URL}/api/fines/payment/order`, { amount: fine.amount }, config);
+            const order = orderRes.data;
+
+            // 2. Open Razorpay options
+            const options = {
+                key: order.keyId, // Key ID from server response
+                amount: order.amount,
+                currency: order.currency,
+                name: "Traffic System Fine",
+                description: fine.reason,
+                order_id: order.id,
+                handler: async function (response) {
+                    // 3. Verify Payment
+                    try {
+                        await axios.post(`${API_URL}/api/fines/payment/verify`, {
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_signature: response.razorpay_signature,
+                            fineId: fine._id
+                        }, config);
+
+                        alert('Payment Successful!');
+                        fetchFines();
+                    } catch (err) {
+                        alert('Payment Verification Failed');
+                    }
+                },
+                prefill: {
+                    name: "User Name", // Could retrieve from authUser
+                    email: "user@example.com",
+                    contact: "9999999999"
+                },
+                theme: {
+                    color: "#3399cc"
+                }
+            };
+
+            const rzp1 = new window.Razorpay(options);
+            rzp1.open();
+
         } catch (err) {
-            alert(err.response?.data?.message || 'Payment Failed');
+            console.error(err);
+            alert(err.response?.data?.message || 'Payment initiation failed');
         }
     };
 
@@ -103,7 +158,7 @@ const MyFines = () => {
                                             </span>
                                         ) : (
                                             <button
-                                                onClick={() => handlePay(fine._id)}
+                                                onClick={() => handlePay(fine)}
                                                 className="flex items-center bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-2 rounded-full transition-transform hover:scale-105 shadow-lg shadow-red-900/30"
                                             >
                                                 <AlertTriangle className="h-4 w-4 mr-2" /> Pay Now

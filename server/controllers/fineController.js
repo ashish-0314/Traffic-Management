@@ -61,34 +61,78 @@ const getMyFines = async (req, res) => {
 // @desc    Pay a fine
 // @route   PATCH /api/fines/:id/pay
 // @access  Private
-const payFine = async (req, res) => {
+// Razorpay Configuration
+const Razorpay = require('razorpay');
+const crypto = require('crypto');
+
+// Initialize Razorpay
+// IMPORTANT: Use environment variables for keys in production
+const razorpay = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_placeholder',
+    key_secret: process.env.RAZORPAY_KEY_SECRET || 'rzp_secret_placeholder'
+});
+
+// @desc    Create Razorpay Order
+// @route   POST /api/fines/order
+// @access  Private
+const createPaymentOrder = async (req, res) => {
+    const { amount } = req.body;
+
+    // Razorpay expects amount in paise (multiply by 100)
+    const options = {
+        amount: amount * 100,
+        currency: "INR",
+        receipt: `receipt_${Date.now()}`
+    };
+
     try {
-        const fine = await Fine.findById(req.params.id);
-
-        if (!fine) {
-            return res.status(404).json({ message: 'Fine not found' });
-        }
-
-        // Ensure the fine belongs to the user trying to pay
-        if (fine.user.toString() !== req.user._id.toString()) {
-            return res.status(401).json({ message: 'Not authorized' });
-        }
-
-        if (fine.status === 'Paid') {
-            return res.status(400).json({ message: 'Fine is already paid' });
-        }
-
-        fine.status = 'Paid';
-        const updatedFine = await fine.save();
-        res.json(updatedFine);
+        const order = await razorpay.orders.create(options);
+        res.json({ ...order, keyId: process.env.RAZORPAY_KEY_ID });
     } catch (error) {
-        res.status(500).json({ message: 'Failed to pay fine' });
+        console.error(error);
+        res.status(500).json({ message: 'Failed to create payment order' });
     }
 };
 
+// @desc    Verify Payment and Mark Fine as Paid
+// @route   POST /api/fines/verify
+// @access  Private
+const verifyPayment = async (req, res) => {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, fineId } = req.body;
+
+    const generated_signature = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET || 'rzp_secret_placeholder')
+        .update(razorpay_order_id + "|" + razorpay_payment_id)
+        .digest('hex');
+
+    if (generated_signature === razorpay_signature) {
+        // Payment Verified, Update Fine Status
+        try {
+            const fine = await Fine.findById(fineId);
+            if (!fine) {
+                return res.status(404).json({ message: 'Fine not found' });
+            }
+
+            if (fine.status === 'Paid') {
+                return res.status(400).json({ message: 'Fine is already paid' });
+            }
+
+            fine.status = 'Paid';
+            fine.paymentId = razorpay_payment_id; // Store payment ref if needed (make sure to add to Schema if strict)
+            const updatedFine = await fine.save();
+
+            res.json({ message: 'Payment verified and fine updated', fine: updatedFine });
+        } catch (error) {
+            res.status(500).json({ message: 'Failed to update fine status' });
+        }
+    } else {
+        res.status(400).json({ message: 'Invalid payment signature' });
+    }
+};
+
+
+
 // @desc    Get all fines (Admin/Police)
 // @route   GET /api/fines
-// @access  Private/Admin/Police
 const getAllFines = async (req, res) => {
     try {
         const fines = await Fine.find({})
@@ -103,7 +147,6 @@ const getAllFines = async (req, res) => {
 
 // @desc    Get fine statistics (Total Collected)
 // @route   GET /api/fines/stats
-// @access  Private/Admin/Police
 const getFineStats = async (req, res) => {
     try {
         const stats = await Fine.aggregate([
@@ -125,4 +168,4 @@ const getFineStats = async (req, res) => {
     }
 };
 
-module.exports = { issueFine, getMyFines, payFine, getAllFines, getFineStats };
+module.exports = { issueFine, getMyFines, createPaymentOrder, verifyPayment, getAllFines, getFineStats };
