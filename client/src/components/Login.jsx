@@ -158,7 +158,7 @@ const Login = () => {
                 }
                 
                 .glass-input:focus {
-                    background: rgba(255, 255, 255, 0.12);
+                    background: rgba(0, 0, 0, 0.6);
                     border: 1px solid rgba(59, 130, 246, 0.6);
                     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
                 }

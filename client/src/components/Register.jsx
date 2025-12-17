@@ -219,7 +219,7 @@ const Register = () => {
                     font-size: 13px;
                 }
                 .glass-input:focus {
-                    background: rgba(255, 255, 255, 0.15);
+                    background: rgba(0, 0, 0, 0.6);
                     border-color: #3b82f6;
                 }
                 .glass-input::placeholder { color: rgba(255, 255, 255, 0.4); }
