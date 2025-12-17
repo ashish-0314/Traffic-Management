@@ -242,7 +242,7 @@ const ReportIncident = () => {
                             <button
                                 type="button"
                                 onClick={handleLocationDetect}
-                                className="flex items-center text-blue-300 hover:text-white transition-colors"
+                                className="flex items-center text-blue-900 font-semibold hover:text-white transition-colors"
                             >
                                 <MapPin size={14} className="mr-1" /> Detect My Current Location
                             </button>
@@ -333,8 +333,8 @@ const ReportIncident = () => {
                 .glass-input {
                     width: 100%;
                     height: 42px;
-                    background: rgba(255, 255, 255, 0.05);
-                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    background: rgba(0, 0, 0, 0.5);
+                    border: 1px solid rgba(255, 255, 255, 0.2);
                     border-radius: 8px;
                     padding: 0 12px 0 36px;
                     color: white;
@@ -347,11 +347,11 @@ const ReportIncident = () => {
                     padding-top: 10px;
                 }
                 .glass-input:focus {
-                    background: rgba(255, 255, 255, 0.1);
+                    background: rgba(0, 0, 0, 0.6);
                     border-color: #3b82f6;
                     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
                 }
-                .glass-input::placeholder { color: rgba(255, 255, 255, 0.3); }
+                .glass-input::placeholder { color: rgba(255, 255, 255, 0.4); }
                 
                 .btn-submit {
                     background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
