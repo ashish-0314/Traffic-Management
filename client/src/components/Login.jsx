@@ -147,8 +147,8 @@ const Login = () => {
                 .glass-input {
                     width: 100%;
                     height: 44px;
-                    background: rgba(255, 255, 255, 0.08);
-                    border: 1px solid rgba(255, 255, 255, 0.15);
+                    background: rgba(0, 0, 0, 0.5);
+                    border: 1px solid rgba(255, 255, 255, 0.2);
                     border-radius: 8px;
                     padding: 0 15px 0 40px;
                     color: white;

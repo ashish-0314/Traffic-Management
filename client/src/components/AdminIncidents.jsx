@@ -2,13 +2,14 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { AlertTriangle, CheckCircle, XCircle, FileText, ClipboardList } from 'lucide-react';
+import { AlertTriangle, CheckCircle, XCircle, FileText, ClipboardList, Maximize2, X } from 'lucide-react';
 
 const AdminIncidents = () => {
     const { token } = useAuth();
     const navigate = useNavigate();
     const [incidents, setIncidents] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [selectedMedia, setSelectedMedia] = useState(null);
 
     const fetchIncidents = async () => {
         try {
@@ -75,13 +76,23 @@ const AdminIncidents = () => {
                         {incidents.map((incident) => (
                             <div key={incident._id} className="bg-white/5 hover:bg-white/10 transition-colors rounded-xl p-6 border border-white/10 flex flex-col md:flex-row gap-6 group">
                                 {/* Media Section */}
-                                <div className="w-full md:w-1/3">
+                                <div className="w-full md:w-1/3 relative group/media">
                                     {incident.mediaUrl ? (
-                                        incident.mediaUrl.endsWith('.mp4') || incident.mediaUrl.endsWith('.mov') ? (
-                                            <video src={incident.mediaUrl} controls className="rounded-lg w-full h-48 object-cover border border-white/20" />
-                                        ) : (
-                                            <img src={incident.mediaUrl} alt="Evidence" className="rounded-lg w-full h-48 object-cover border border-white/20" />
-                                        )
+                                        <>
+                                            {incident.mediaUrl.endsWith('.mp4') || incident.mediaUrl.endsWith('.mov') ? (
+                                                <video src={incident.mediaUrl} controls className="rounded-lg w-full h-48 object-cover border border-white/20" />
+                                            ) : (
+                                                <img src={incident.mediaUrl} alt="Evidence" className="rounded-lg w-full h-48 object-cover border border-white/20" />
+                                            )}
+
+                                            <button
+                                                onClick={() => setSelectedMedia({ url: incident.mediaUrl, type: incident.mediaUrl.endsWith('.mp4') || incident.mediaUrl.endsWith('.mov') ? 'video' : 'image' })}
+                                                className="absolute top-2 right-2 p-2 bg-black/60 hover:bg-black/80 text-white rounded-full opacity-0 group-hover/media:opacity-100 transition-opacity backdrop-blur-sm border border-white/20"
+                                                title="View Full Size"
+                                            >
+                                                <Maximize2 className="w-4 h-4" />
+                                            </button>
+                                        </>
                                     ) : (
                                         <div className="bg-white/5 h-48 rounded-lg flex items-center justify-center text-white/50 border border-white/10">
                                             No Media
@@ -144,6 +155,28 @@ const AdminIncidents = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Full Screen Media Modal */}
+            {selectedMedia && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-in fade-in duration-200" onClick={() => setSelectedMedia(null)}>
+                    <button
+                        onClick={() => setSelectedMedia(null)}
+                        className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors"
+                    >
+                        <X className="w-6 h-6" />
+                    </button>
+
+                    <div className="max-w-5xl max-h-[90vh] w-full flex items-center justify-center pointer-events-none">
+                        <div className="pointer-events-auto relative rounded-lg overflow-hidden shadow-2xl border border-white/10">
+                            {selectedMedia.type === 'video' ? (
+                                <video src={selectedMedia.url} controls autoPlay className="max-w-full max-h-[85vh] object-contain" />
+                            ) : (
+                                <img src={selectedMedia.url} alt="Full Evidence" className="max-w-full max-h-[85vh] object-contain" />
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <style jsx>{`
                 .custom-scrollbar::-webkit-scrollbar {

@@ -83,6 +83,16 @@ const Register = () => {
                             </div>
                         )}
 
+                        {/* Role Selection - Top Priority */}
+                        <div className="relative mb-3">
+                            <i className="fas fa-user-tag absolute left-3 top-3 text-blue-400 text-xs"></i>
+                            <select name="role" value={formData.role} onChange={handleChange} className="glass-input appearance-none">
+                                <option value="user" className="text-black">Register as User</option>
+                                <option value="traffic_police" className="text-black">Register as Traffic Officer</option>
+                            </select>
+                            <i className="fas fa-chevron-down absolute right-3 top-3 text-white/50 text-xs pointer-events-none"></i>
+                        </div>
+
                         <div className="grid grid-cols-2 gap-3">
                             {/* Name */}
                             <div className="relative">
@@ -154,7 +164,7 @@ const Register = () => {
                             )}
                         </div>
 
-                        <div className="grid grid-cols-3 gap-3">
+                        <div className="grid grid-cols-2 gap-3">
                             {/* Gender */}
                             <div className="relative">
                                 <select name="gender" value={formData.gender} onChange={handleChange} required className="glass-input appearance-none">
@@ -167,13 +177,6 @@ const Register = () => {
                             {/* Age */}
                             <div className="relative">
                                 <input name="age" type="number" required className="glass-input" placeholder="Age" value={formData.age} onChange={handleChange} min="18" max="100" />
-                            </div>
-                            {/* Role */}
-                            <div className="relative">
-                                <select name="role" value={formData.role} onChange={handleChange} className="glass-input appearance-none">
-                                    <option value="user" className="text-black">User</option>
-                                    <option value="traffic_police" className="text-black">Police</option>
-                                </select>
                             </div>
                         </div>
 
@@ -207,8 +210,8 @@ const Register = () => {
                 .glass-input {
                     width: 100%;
                     height: 38px; /* Compact height */
-                    background: rgba(255, 255, 255, 0.08);
-                    border: 1px solid rgba(255, 255, 255, 0.15);
+                    background: rgba(0, 0, 0, 0.5);
+                    border: 1px solid rgba(255, 255, 255, 0.2);
                     border-radius: 6px;
                     padding: 0 10px 0 32px; /* Adjusted padding */
                     color: white;

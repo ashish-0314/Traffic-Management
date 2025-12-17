@@ -277,16 +277,18 @@ const Profile = () => {
                                     className="glass-input"
                                 />
                             </div>
-                            <div>
-                                <label className="block text-xs font-semibold text-blue-300 mb-1 ml-1">VEHICLE NUMBER</label>
-                                <input
-                                    type="text"
-                                    value={formData.vehicleNumber}
-                                    onChange={(e) => setFormData({ ...formData, vehicleNumber: e.target.value })}
-                                    className="glass-input"
-                                    placeholder="e.g. MH02AB1234"
-                                />
-                            </div>
+                            {authUser && authUser.role !== 'traffic_police' && (
+                                <div>
+                                    <label className="block text-xs font-semibold text-blue-300 mb-1 ml-1">VEHICLE NUMBER</label>
+                                    <input
+                                        type="text"
+                                        value={formData.vehicleNumber}
+                                        onChange={(e) => setFormData({ ...formData, vehicleNumber: e.target.value })}
+                                        className="glass-input"
+                                        placeholder="e.g. MH02AB1234"
+                                    />
+                                </div>
+                            )}
                         </div>
 
                         <div className="flex justify-end pt-4">

@@ -116,8 +116,10 @@ const getFineStats = async (req, res) => {
             }
         ]);
 
+        const pendingCount = await Fine.countDocuments({ status: 'Unpaid' });
+
         const totalCollected = stats.length > 0 ? stats[0].totalCollected : 0;
-        res.json({ totalCollected });
+        res.json({ totalCollected, pendingCount });
     } catch (error) {
         res.status(500).json({ message: 'Failed to fetch fine statistics' });
     }
