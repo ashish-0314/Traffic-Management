@@ -36,6 +36,25 @@ const updateUserProfile = async (req, res) => {
             if (req.body.address !== undefined) user.address = req.body.address;
             if (req.body.licenseNumber !== undefined) user.licenseNumber = req.body.licenseNumber;
 
+            // Handle location update
+            if (req.body.location) {
+                try {
+                    const parsedLocation = typeof req.body.location === 'string'
+                        ? JSON.parse(req.body.location)
+                        : req.body.location;
+
+                    if (parsedLocation.lat && parsedLocation.lng) {
+                        user.location = {
+                            lat: Number(parsedLocation.lat),
+                            lng: Number(parsedLocation.lng),
+                            address: parsedLocation.address || user.address
+                        };
+                    }
+                } catch (e) {
+                    console.error('Location parsing error', e);
+                }
+            }
+
             // Sparse unique field handling
             if (req.body.vehicleNumber !== undefined) {
                 if (req.body.vehicleNumber.trim() === '') {

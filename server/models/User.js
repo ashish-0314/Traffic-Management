@@ -40,6 +40,11 @@ const userSchema = new mongoose.Schema({
     address: {
         type: String,
     },
+    location: {
+        lat: { type: Number },
+        lng: { type: Number },
+        address: String
+    },
     profilePicture: {
         type: String, // URL
         default: ''

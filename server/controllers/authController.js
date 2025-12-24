@@ -17,7 +17,7 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ message: 'User already exists' });
         }
 
-        // Restrict to one admin
+        // Restrict to one admin 
         if (role === 'admin') {
             const adminExists = await User.findOne({ role: 'admin' });
             if (adminExists) {

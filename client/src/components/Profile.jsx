@@ -14,7 +14,10 @@ const Profile = () => {
         email: '',
         gender: '',
         age: '',
+        age: '',
         address: '',
+        lat: '',
+        lng: '',
         licenseNumber: '',
         vehicleNumber: '',
         profilePicture: ''
@@ -57,7 +60,10 @@ const Profile = () => {
                 email: data.email || '',
                 gender: data.gender || '',
                 age: data.age || '',
+                age: data.age || '',
                 address: data.address || '',
+                lat: data.location?.lat || '',
+                lng: data.location?.lng || '',
                 licenseNumber: data.licenseNumber || '',
                 vehicleNumber: data.vehicleNumber || '',
                 profilePicture: data.profilePicture || ''
@@ -90,6 +96,14 @@ const Profile = () => {
             if (formData.gender) data.append('gender', formData.gender);
             if (formData.age) data.append('age', formData.age);
             if (formData.address) data.append('address', formData.address);
+
+            if (formData.lat && formData.lng) {
+                data.append('location', JSON.stringify({
+                    lat: formData.lat,
+                    lng: formData.lng,
+                    address: formData.address
+                }));
+            }
             if (formData.licenseNumber) data.append('licenseNumber', formData.licenseNumber);
             if (formData.vehicleNumber) data.append('vehicleNumber', formData.vehicleNumber);
 
@@ -267,6 +281,28 @@ const Profile = () => {
                                     rows="2"
                                     className="glass-input py-2 h-auto"
                                 />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-semibold text-blue-300 mb-1 ml-1">LATITUDE (TESTING)</label>
+                                    <input
+                                        type="number"
+                                        value={formData.lat}
+                                        onChange={(e) => setFormData({ ...formData, lat: e.target.value })}
+                                        className="glass-input"
+                                        placeholder="e.g. 12.9716"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-semibold text-blue-300 mb-1 ml-1">LONGITUDE (TESTING)</label>
+                                    <input
+                                        type="number"
+                                        value={formData.lng}
+                                        onChange={(e) => setFormData({ ...formData, lng: e.target.value })}
+                                        className="glass-input"
+                                        placeholder="e.g. 77.5946"
+                                    />
+                                </div>
                             </div>
                             <div>
                                 <label className="block text-xs font-semibold text-blue-300 mb-1 ml-1">LICENSE NUMBER</label>

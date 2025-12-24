@@ -6,18 +6,20 @@ const User = require('../models/User');
 // @route   POST /api/incidents
 // @access  Private
 const imagekit = require('../config/imagekit');
-const fs = require('fs');
-const path = require('path');
 
-// Helper to log errors to file
-const logError = (err) => {
-    const logPath = path.join(__dirname, '../incident_errors.log');
-    const msg = `[${new Date().toISOString()}] ${err.message}\nStack: ${err.stack}\n\n`;
-    fs.appendFileSync(logPath, msg);
-};
 
 const createIncident = async (req, res) => {
-    const { type, location, description } = req.body;
+    let { type, location, description } = req.body;
+
+    // Parse location if string
+    if (typeof location === 'string') {
+        try {
+            location = JSON.parse(location);
+        } catch (e) {
+            console.error('Failed to parse location:', e);
+        }
+    }
+
     let mediaUrl = req.body.mediaUrl;
 
     try {
@@ -41,7 +43,7 @@ const createIncident = async (req, res) => {
 
         const incident = new Incident({
             type,
-            location: typeof location === 'string' ? JSON.parse(location) : location,
+            location, // Already parsed
             description,
             vehiclePlate: req.body.vehiclePlate,
             mediaUrl,
@@ -50,15 +52,45 @@ const createIncident = async (req, res) => {
 
         const createdIncident = await incident.save();
 
-        // Notify users about Accidents (Broadcasting to all users for now)
-        if (type === 'Accident') {
+        // Notify users about Accidents (Location-based filtering)
+        if (type === 'Accident' && location && location.lat && location.lng) {
             const allUsers = await User.find({ _id: { $ne: req.user._id } }); // Exclude reporter
-            const notifications = allUsers.map(user => ({
-                user: user._id,
-                type: 'INCIDENT',
-                message: `Alert: An accident has been reported at ${location.address || 'a nearby location'}. Drive carefully!`,
-                referenceId: createdIncident._id
-            }));
+
+            // Haversine formula to calculate distance in km
+            const calculateDistance = (lat1, lon1, lat2, lon2) => {
+                const R = 6371; // Radius of the earth in km
+                const dLat = (lat2 - lat1) * (Math.PI / 180);
+                const dLon = (lon2 - lon1) * (Math.PI / 180);
+                const a =
+                    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                    Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+                    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                const d = R * c; // Distance in km
+                return d;
+            };
+
+            const NOTIFICATION_RADIUS_KM = 20;
+
+            const notifications = allUsers
+                .filter(user => {
+                    if (user.location && user.location.lat && user.location.lng) {
+                        const distance = calculateDistance(
+                            location.lat,
+                            location.lng,
+                            user.location.lat,
+                            user.location.lng
+                        );
+                        return distance <= NOTIFICATION_RADIUS_KM;
+                    }
+                    return false; // Skip users without location
+                })
+                .map(user => ({
+                    user: user._id,
+                    type: 'INCIDENT',
+                    message: `Alert: An accident has been reported at ${location.address || 'a nearby location'}. Drive carefully!`,
+                    referenceId: createdIncident._id
+                }));
 
             if (notifications.length > 0) {
                 await Notification.insertMany(notifications);

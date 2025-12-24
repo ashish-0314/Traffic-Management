@@ -63,7 +63,7 @@ const Register = () => {
                 backgroundImage: 'url("https://images.pexels.com/photos/2962589/pexels-photo-2962589.jpeg")'
             }}>
 
-            <div className="bg-transparent flex flex-col md:flex-row items-center justify-between p-6 shadow-2xl rounded-2xl max-w-5xl w-full h-auto max-h-screen bg-black/60 backdrop-blur-md border border-blue-500/30 hover:shadow-2xl transition-transform transform hover:scale-105">
+            <div className="bg-transparent flex flex-col md:flex-row items-center justify-between p-6 shadow-2xl rounded-2xl max-w-5xl w-full h-auto max-h-screen backdrop-blur-md border border-blue-500/30 hover:shadow-2xl transition-transform transform hover:scale-105">
 
                 {/* Left Column - Form */}
                 <div className="w-full md:w-3/5 h-full pr-4">
@@ -193,7 +193,7 @@ const Register = () => {
                 </div>
 
                 {/* Right Column - Image */}
-                <div className="hidden md:block md:w-2/5 h-full ml-6 pl-6 border-l border-white/10 flex flex-col justify-center">
+                <div className="md:block md:w-2/5 h-full ml-6 pl-6 border-l border-white/10 flex flex-col justify-center">
                     <img
                         src="https://images.pexels.com/photos/1051075/pexels-photo-1051075.jpeg"
                         alt="Traffic"
