@@ -36,8 +36,8 @@ const TrafficMap = () => {
         const fetchIncidents = async () => {
             try {
                 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-                const res = await axios.get(`${API_URL}/api/incidents?status=Verified`);
-                setIncidents(res.data);
+                const res = await axios.get(`${API_URL}/api/incidents?status=Verified&limit=50&timeLimit=72`);
+                setIncidents(res.data.incidents || []);
             } catch (error) {
                 console.error('Failed to fetch incidents', error);
             }

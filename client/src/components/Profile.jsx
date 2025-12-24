@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Camera, Save, Lock, User, UserCircle } from 'lucide-react';
+import { Camera, Save, Lock, User, UserCircle, MapPin, Loader2 } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 
@@ -7,13 +7,13 @@ const Profile = () => {
     const { user: authUser } = useAuth();
     const [activeTab, setActiveTab] = useState('details');
     const [loading, setLoading] = useState(false);
+    const [isLocating, setIsLocating] = useState(false);
     const [message, setMessage] = useState({ type: '', text: '' });
 
     const [formData, setFormData] = useState({
         name: '',
         email: '',
         gender: '',
-        age: '',
         age: '',
         address: '',
         lat: '',
@@ -60,7 +60,6 @@ const Profile = () => {
                 email: data.email || '',
                 gender: data.gender || '',
                 age: data.age || '',
-                age: data.age || '',
                 address: data.address || '',
                 lat: data.location?.lat || '',
                 lng: data.location?.lng || '',
@@ -80,6 +79,36 @@ const Profile = () => {
             setSelectedFile(file);
             setPreviewUrl(URL.createObjectURL(file));
         }
+    };
+
+    const handleGetLocation = () => {
+        if (!navigator.geolocation) {
+            setMessage({ type: 'error', text: 'Geolocation is not supported by your browser' });
+            return;
+        }
+
+        setIsLocating(true);
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                setFormData(prev => ({
+                    ...prev,
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                }));
+                setIsLocating(false);
+                setMessage({ type: 'success', text: 'Location detected successfully!' });
+            },
+            (error) => {
+                console.error(error);
+                let errorMsg = 'Unable to retrieve your location';
+                if (error.code === 1) errorMsg = 'Location permission denied';
+                if (error.code === 2) errorMsg = 'Location unavailable';
+                if (error.code === 3) errorMsg = 'Location request timed out';
+
+                setMessage({ type: 'error', text: errorMsg });
+                setIsLocating(false);
+            }
+        );
     };
 
     const handleProfileUpdate = async (e) => {
@@ -282,26 +311,32 @@ const Profile = () => {
                                     className="glass-input py-2 h-auto"
                                 />
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-xs font-semibold text-blue-300 mb-1 ml-1">LATITUDE (TESTING)</label>
-                                    <input
-                                        type="number"
-                                        value={formData.lat}
-                                        onChange={(e) => setFormData({ ...formData, lat: e.target.value })}
-                                        className="glass-input"
-                                        placeholder="e.g. 12.9716"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-semibold text-blue-300 mb-1 ml-1">LONGITUDE (TESTING)</label>
-                                    <input
-                                        type="number"
-                                        value={formData.lng}
-                                        onChange={(e) => setFormData({ ...formData, lng: e.target.value })}
-                                        className="glass-input"
-                                        placeholder="e.g. 77.5946"
-                                    />
+                            <div className="md:col-span-2">
+                                <label className="block text-xs font-semibold text-blue-300 mb-1 ml-1">LOCATION</label>
+                                <div className="flex flex-col sm:flex-row items-center gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={handleGetLocation}
+                                        disabled={isLocating}
+                                        className="w-full sm:w-auto flex items-center justify-center px-4 py-2 bg-blue-500/10 text-blue-400 border border-blue-500/30 rounded-lg hover:bg-blue-500/20 transition text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        {isLocating ? (
+                                            <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Detecting...</>
+                                        ) : (
+                                            <><MapPin className="w-4 h-4 mr-2" /> Detect My Location</>
+                                        )}
+                                    </button>
+
+                                    {(formData.lat && formData.lng) ? (
+                                        <div className="flex-1 w-full sm:w-auto text-xs text-green-300 bg-green-500/10 px-3 py-2 rounded border border-green-500/20 flex items-center">
+                                            <div className="w-2 h-2 rounded-full bg-green-500 mr-2 animate-pulse"></div>
+                                            Verified: {Number(formData.lat).toFixed(5)}, {Number(formData.lng).toFixed(5)}
+                                        </div>
+                                    ) : (
+                                        <div className="flex-1 w-full sm:w-auto text-xs text-gray-400 bg-white/5 px-3 py-2 rounded border border-white/10">
+                                            Location not set. Click button to detect.
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                             <div>

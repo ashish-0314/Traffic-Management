@@ -25,6 +25,7 @@ const incidentSchema = new mongoose.Schema({
         type: String,
         enum: ['Pending', 'Verified', 'Rejected', 'Resolved'],
         default: 'Pending',
+        index: true,
     },
     reportedBy: {
         type: mongoose.Schema.Types.ObjectId,
@@ -34,6 +35,9 @@ const incidentSchema = new mongoose.Schema({
 }, {
     timestamps: true,
 });
+
+// Index for sorting by date
+incidentSchema.index({ createdAt: -1 });
 
 const Incident = mongoose.model('Incident', incidentSchema);
 

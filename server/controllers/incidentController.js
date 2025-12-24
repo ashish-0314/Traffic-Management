@@ -31,7 +31,7 @@ const createIncident = async (req, res) => {
                 const uploadResponse = await imagekit.upload({
                     file: fileBase64, // required
                     fileName: `incident-${Date.now()}-${req.file.originalname}`, // required
-                    folder: '/incidents',
+                    folder: '/traffic_system/incidents',
                 });
                 mediaUrl = uploadResponse.url;
             } catch (uploadError) {
@@ -110,13 +110,30 @@ const createIncident = async (req, res) => {
 // @access  Public (or Private based on filter)
 const getIncidents = async (req, res) => {
     try {
-        const { status } = req.query;
+        const { status, page = 1, limit = 10, timeLimit } = req.query;
         const filter = status ? { status } : {}; // Allow filtering by status (e.g., only Verified for maps)
+
+        if (timeLimit) {
+            const date = new Date();
+            date.setHours(date.getHours() - Number(timeLimit));
+            filter.createdAt = { $gte: date };
+        }
 
         // Also support bbox filtering for map efficiency later
 
-        const incidents = await Incident.find(filter).populate('reportedBy', 'name email').sort({ createdAt: -1 });
-        res.json(incidents);
+        const count = await Incident.countDocuments(filter);
+        const incidents = await Incident.find(filter)
+            .populate('reportedBy', 'name email')
+            .sort({ createdAt: -1 })
+            .limit(Number(limit))
+            .skip((Number(page) - 1) * Number(limit));
+
+        res.json({
+            incidents,
+            totalPages: Math.ceil(count / limit),
+            currentPage: Number(page),
+            totalIncidents: count
+        });
     } catch (error) {
         res.status(500).json({ message: 'Failed to fetch incidents' });
     }

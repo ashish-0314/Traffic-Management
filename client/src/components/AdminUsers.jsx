@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Search, Filter, Shield, User, Car, AlertCircle } from 'lucide-react';
+import { Search, Filter, Shield, User, Car, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const AdminUsers = () => {
     const { token } = useAuth();
@@ -11,6 +11,8 @@ const AdminUsers = () => {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [roleFilter, setRoleFilter] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
 
     const fetchUsers = async () => {
         try {
@@ -21,12 +23,15 @@ const AdminUsers = () => {
                 },
                 params: {
                     search,
-                    role: roleFilter
+                    role: roleFilter,
+                    page: currentPage,
+                    limit: 10
                 }
             };
             const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
             const res = await axios.get(`${API_URL}/api/users`, config);
-            setUsers(res.data);
+            setUsers(res.data.users);
+            setTotalPages(res.data.pages);
         } catch (err) {
             console.error(err);
         } finally {
@@ -36,10 +41,11 @@ const AdminUsers = () => {
 
     useEffect(() => {
         fetchUsers();
-    }, [token, roleFilter]); // auto-fetch on filter change
+    }, [token, roleFilter, currentPage]); // auto-fetch on filter change
 
     const handleSearch = (e) => {
         e.preventDefault();
+        setCurrentPage(1); // Reset to first page
         fetchUsers();
     };
 
@@ -219,6 +225,29 @@ const AdminUsers = () => {
                             <p>No users found matching your search.</p>
                         </div>
                     )}
+                </div>
+
+                {/* Pagination Controls */}
+                <div className="flex justify-between items-center mt-4 pt-4 border-t border-white/10 text-gray-400 text-sm">
+                    <div>
+                        Page {currentPage} of {totalPages}
+                    </div>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                            disabled={currentPage === 1}
+                            className="bg-white/5 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed p-2 rounded-lg border border-white/10 transition-colors"
+                        >
+                            <ChevronLeft className="w-5 h-5" />
+                        </button>
+                        <button
+                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                            disabled={currentPage === totalPages || totalPages === 0}
+                            className="bg-white/5 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed p-2 rounded-lg border border-white/10 transition-colors"
+                        >
+                            <ChevronRight className="w-5 h-5" />
+                        </button>
+                    </div>
                 </div>
             </div>
 
