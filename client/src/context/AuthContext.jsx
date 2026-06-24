@@ -12,9 +12,6 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         if (token) {
-            // Optionally verify token validity with backend here
-            // For now, we assume if token exists, user is logged in (simplified)
-            // You might want to decode jwt to get user info or hit a /me endpoint
             const userData = JSON.parse(localStorage.getItem('user'));
             setUser(userData);
         }

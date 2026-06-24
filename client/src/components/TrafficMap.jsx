@@ -84,6 +84,81 @@ const TrafficMap = () => {
                 setUserLocation(userPos);
                 updateUserMarker(userPos.lng, userPos.lat);
             }
+
+            // Fetch flow segment data when clicking on the map
+            map.on('click', async (e) => {
+                const { lng, lat } = e.lngLat;
+                try {
+                    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+                    const zoom = Math.floor(map.getZoom());
+                    const res = await axios.get(`${API_URL}/api/traffic/flow?lat=${lat}&lng=${lng}&zoom=${zoom}`);
+
+                    if (res.data && res.data.flowSegmentData) {
+                        const flowData = res.data.flowSegmentData;
+
+                        // Draw highlighted segment
+                        if (flowData.coordinates && flowData.coordinates.coordinate) {
+                            const coords = flowData.coordinates.coordinate.map(c => [c.longitude, c.latitude]);
+
+                            // Remove previous if exists
+                            if (mapInstance.current.getLayer('clicked-segment')) {
+                                mapInstance.current.removeLayer('clicked-segment');
+                                mapInstance.current.removeSource('clicked-segment');
+                            }
+
+                            mapInstance.current.addLayer({
+                                id: 'clicked-segment',
+                                type: 'line',
+                                source: {
+                                    type: 'geojson',
+                                    data: {
+                                        type: 'Feature',
+                                        geometry: {
+                                            type: 'LineString',
+                                            coordinates: coords
+                                        }
+                                    }
+                                },
+                                paint: {
+                                    'line-color': '#eab308', // Yellow highlight
+                                    'line-width': 8,
+                                    'line-opacity': 0.7
+                                }
+                            });
+                        }
+
+                        const popup = new tt.Popup({ offset: 35 })
+                            .setLngLat([lng, lat])
+                            .setHTML(`
+                                <div class="p-2 min-w-[150px]">
+                                    <h3 class="font-bold text-sm mb-2 border-b pb-1 text-gray-800">Traffic Flow Info</h3>
+                                    <div class="flex justify-between items-center mb-1">
+                                        <span class="text-xs text-gray-500 font-semibold uppercase">Current Speed</span>
+                                        <span class="text-sm font-bold text-blue-600">${flowData.currentSpeed} km/h</span>
+                                    </div>
+                                    <div class="flex justify-between items-center mb-1">
+                                        <span class="text-xs text-gray-500 font-semibold uppercase">Free Flow</span>
+                                        <span class="text-sm font-bold text-gray-600">${flowData.freeFlowSpeed} km/h</span>
+                                    </div>
+                                    <div class="flex justify-between items-center mt-2 pt-1 border-t">
+                                        <span class="text-xs text-gray-500 font-semibold uppercase">Confidence</span>
+                                        <span class="text-xs font-bold ${flowData.confidence > 0.8 ? 'text-green-600' : 'text-amber-600'}">${(flowData.confidence * 100).toFixed(0)}%</span>
+                                    </div>
+                                </div>
+                            `)
+                            .addTo(mapInstance.current);
+
+                        popup.on('close', () => {
+                            if (mapInstance.current.getLayer('clicked-segment')) {
+                                mapInstance.current.removeLayer('clicked-segment');
+                                mapInstance.current.removeSource('clicked-segment');
+                            }
+                        });
+                    }
+                } catch (err) {
+                    console.error('Error fetching flow segment data', err);
+                }
+            });
         });
 
         // Save center on move
