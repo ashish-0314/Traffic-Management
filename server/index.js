@@ -6,8 +6,6 @@ const path = require('path');
 
 dotenv.config(); // Must be loaded before routes/controllers
 
-dotenv.config(); // Must be loaded before routes/controllers
-
 console.log('Current Working Directory:', process.cwd());
 console.log('Environment Variables Check:');
 console.log('IMAGEKIT_PUBLIC_KEY:', process.env.IMAGEKIT_PUBLIC_KEY ? 'Set' : 'Missing');
@@ -30,7 +28,17 @@ connectDB();
 
 const app = express();
 
-app.use(cors());
+// Allow all origins (handles Vercel preview URLs too)
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: false
+}));
+
+// Handle preflight OPTIONS requests for all routes
+app.options('*', cors());
+
 app.use(express.json());
 
 // Serve uploads folder statically
