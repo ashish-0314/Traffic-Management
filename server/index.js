@@ -37,7 +37,8 @@ app.use(cors({
 }));
 
 // Handle preflight OPTIONS requests for all routes
-app.options('*', cors());
+// Using regex /.*/ because Express 5 rejects '*' as a route string
+app.options(/.*/, cors());
 
 app.use(express.json());
 
