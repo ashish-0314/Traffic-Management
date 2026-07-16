@@ -57,10 +57,12 @@ app.use('/api/fines', fineRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/notifications', notificationRoutes);
 
-// For local development
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+// Only start server locally — Vercel handles this in serverless mode
+if (!process.env.VERCEL) {
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+}
 
 // Required for Vercel serverless deployment
 module.exports = app;
