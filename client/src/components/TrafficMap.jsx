@@ -471,16 +471,26 @@ const TrafficMap = () => {
             : `https://api.tomtom.com/map/1/style/22.2.1-9/basic_main.json?key=${apiKey}`;
 
         try {
+            // First, remove existing traffic before changing style to avoid conflicts
+            try {
+                mapInstance.current.hideTrafficFlow();
+                mapInstance.current.hideTrafficIncidents();
+            } catch(e) {}
+
             mapInstance.current.setStyle(styleUrl);
             
-            // Re-apply traffic layers after style loads
-            mapInstance.current.once('styledata', () => {
-                try {
-                    mapInstance.current.showTrafficFlow();
-                    mapInstance.current.showTrafficIncidents();
-                } catch (e) {
-                    console.error("Could not restore traffic layers:", e);
-                }
+            // Re-apply traffic layers after style is fully loaded
+            mapInstance.current.once('style.load', () => {
+                setTimeout(() => {
+                    try {
+                        if (mapInstance.current.showTrafficFlow) {
+                            mapInstance.current.showTrafficFlow();
+                            mapInstance.current.showTrafficIncidents();
+                        }
+                    } catch (e) {
+                        console.error("Could not restore traffic layers:", e);
+                    }
+                }, 100); // Small delay ensures layers are ready for insertion
             });
         } catch (e) {
             console.error("Error setting style:", e);
