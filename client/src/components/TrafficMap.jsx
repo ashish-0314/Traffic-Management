@@ -86,6 +86,14 @@ const TrafficMap = () => {
             map.addControl(new tt.FullscreenControl());
             map.addControl(new tt.NavigationControl());
 
+            // Explicitly enable live traffic layers
+            try {
+                map.showTrafficFlow();
+                map.showTrafficIncidents();
+            } catch (e) {
+                console.error("Could not show traffic layers:", e);
+            }
+
             // Load saved user location marker
             const savedUserLoc = localStorage.getItem('trafficMapUserLocation');
             if (savedUserLoc) {
@@ -464,6 +472,16 @@ const TrafficMap = () => {
 
         try {
             mapInstance.current.setStyle(styleUrl);
+            
+            // Re-apply traffic layers after style loads
+            mapInstance.current.once('styledata', () => {
+                try {
+                    mapInstance.current.showTrafficFlow();
+                    mapInstance.current.showTrafficIncidents();
+                } catch (e) {
+                    console.error("Could not restore traffic layers:", e);
+                }
+            });
         } catch (e) {
             console.error("Error setting style:", e);
         }
