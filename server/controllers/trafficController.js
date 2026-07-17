@@ -34,8 +34,11 @@ const getTrafficFlow = async (req, res) => {
         const response = await axios.get(url);
         res.json(response.data);
     } catch (error) {
-        console.error('Error fetching traffic flow:', error.message);
-        res.status(500).json({ message: 'Failed to fetch traffic flow data' });
+        console.error('Error fetching traffic flow:', error.response?.data || error.message);
+        res.status(500).json({ 
+            message: 'Failed to fetch traffic flow data',
+            details: error.response?.data || error.message
+        });
     }
 };
 
